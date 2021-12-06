@@ -1,0 +1,217 @@
+基础遍历
+        144.二叉树的前序遍历
+        94.二叉树的中序遍历
+        145.二叉树的后序遍历
+        102.二叉树的层序遍历
+        107.二叉树的层序遍历 II
+        589.N 叉树的前序遍历
+        590.N 叉树的后序遍历
+        429.N 叉树的层序遍历
+
+
+144
+class Solution {
+    List<Integer> res = new ArrayList<Integer>();
+    public List<Integer> preorderTraversal(TreeNode root) {
+        if (root == null) {
+            return res;
+        }
+        res.add(root.val);
+        preorderTraversal(root.left);
+        preorderTraversal(root.right);
+        return res;
+    }
+}
+或者
+class Solution {
+    public List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<Integer>();
+        preorder(root, res);
+        return res;
+    }
+
+    public void preorder(TreeNode root, List<Integer> res) {
+        if (root == null) {
+            return;
+        }
+        res.add(root.val);
+        preorder(root.left, res);
+        preorder(root.right, res);
+    }
+}
+
+94
+class Solution {
+    List<Integer> res = new ArrayList<Integer>();
+    public List<Integer> inorderTraversal(TreeNode root) {
+        if(root == null) {
+            return res;
+        }
+        
+        // 和上一题前序遍历差不多，就是调用递归函数的顺序换了一下位置
+        inorderTraversal(root.left);
+        res.add(root.val);
+        inorderTraversal(root.right);
+
+        return res;
+    }
+}
+
+145
+class Solution {
+    List<Integer> res = new ArrayList<Integer>();
+    public List<Integer> postorderTraversal(TreeNode root) {
+        if(root == null) {
+            return res;
+        }
+            
+            // 和上一题前序遍历差不多，就是调用递归函数的顺序换了一下位置
+        postorderTraversal(root.left);
+        postorderTraversal(root.right);
+        res.add(root.val);
+
+        return res;
+    }
+}
+
+102  自顶向下
+--这是刚开始写的错误代码
+class Solution {
+    List<List<Integer>> res = new ArrayList<List<Integer>>();
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        if(root == null) {
+            return res;
+        }
+        // 层序遍历
+        // 定义一个栈
+        Stack<TreeNode> ck = new Stack<TreeNode>();
+        // 题目说的是给了一个二叉树，二叉树的特点是：空二叉树、一个根节点、只有左节点、只有右节点、左右节点都有
+        // 先将节点push到栈中，然后在一个一个取出来获取左右节点
+        if(root.left != null || root.right != null) {
+            ck.push(root);
+            levelOrder(root.left);
+            levelOrder(root.right);
+        }
+        //
+        List<Integer> list = new ArrayList<Integer>();
+        while(!ck.isEmpty()) {
+            TreeNode node = ck.pop();
+            list.add(node.val);
+        }
+        res.add(list);
+        return res;
+    }
+}
+
+层次遍历可以使用广度优先搜索（BFS）
+对比：如果我们使用 DFS/BFS 只是为了遍历一棵树、一张图上的所有结点的话，那么 DFS 和 BFS 的能力没什么差别。DFS空间复杂度更低
+BFS 遍历：「层序遍历」、「最短路径」
+
+//这道题是求层次遍历的
+class Solution {
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        List<List<Integer>> res = new ArrayList<List<Integer>>();
+       //层次遍历
+       /**
+            1、先判断根节点是否为空，如果不为空就放到队列中
+            2、将根节点从队列弹出来，判断左右节点是否有值，如果有值就放到队列中去
+            3、继续从队列中出值，判断左右节点是否有值...
+            4、继续出值...
+        */
+        if(root == null){
+            return res;
+        }
+        Queue<TreeNode> queue = new LinkedList<TreeNode>();
+        queue.add(root); // add和offer都可以
+        while(!queue.isEmpty()) {
+            // 为了将一层所有节点全部放到一个list中，这里得使用for循环遍历次数
+            List<Integer> tmp = new ArrayList<Integer>(); // 这里list是一次while循环创建一次，不是一次for循环创建一次
+            int nodecount = queue.size();
+            for(int i = 0; i<nodecount;i++) {
+                TreeNode node =  queue.poll();
+                tmp.add(node.val);
+                if(node.left != null){
+                    queue.add(node.left);
+                }
+                if(node.right != null){
+                    queue.add(node.right);
+                }
+            }
+            res.add(tmp);
+        }
+    return res;
+    }
+}
+
+107
+class Solution {
+    // 这个是自定向上
+    public List<List<Integer>> levelOrderBottom(TreeNode root) {
+        List<List<Integer>> levelOrder = new LinkedList<List<Integer>>();
+        if (root == null) {
+            return levelOrder;
+        }
+        Queue<TreeNode> queue = new LinkedList<TreeNode>();
+        queue.offer(root);
+        while (!queue.isEmpty()) {
+            List<Integer> level = new ArrayList<Integer>();
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                TreeNode node = queue.poll();
+                level.add(node.val);
+                TreeNode left = node.left, right = node.right;
+                if (left != null) {
+                    queue.offer(left);
+                }
+                if (right != null) {
+                    queue.offer(right);
+                }
+            }
+            levelOrder.add(0, level);  //java里边list.void add(int index,E element)，index表示其中插入指定元素的索引，插入之后将当前处于该位置的元素及其后续元素的索引加1，index=0的元素在index=1元素的右边
+        }
+        return levelOrder;
+    }
+}
+
+
+589
+
+590
+
+
+429
+// 从上面第一个题写到这个题，挺有成就感的，感觉树的问题差不多已经会解决了
+class Solution {
+    public List<List<Integer>> levelOrder(Node root) {
+        List<List<Integer>> res = new ArrayList<List<Integer>>();
+        if(root == null) {
+            return res;
+        }
+
+        Queue<Node> queue = new LinkedList<Node>();
+        queue.add(root);
+        while(!queue.isEmpty()) {
+            List<Integer> tmp = new ArrayList<Integer>();
+            // 需要将一层的节点放在同一个list中去，所以需要通过节点数进行遍历
+            int countnum = queue.size();
+            for(int i=0;i<countnum;i++) {
+                Node node = queue.poll();
+                tmp.add(node.val);
+ 
+                // 因为这里使用的是队列，先进先出，所以就不需要对容器中的元素进行顺序处理
+                for(Node item : node.children) {
+                    queue.add(item);
+                }
+            }
+            res.add(tmp);
+        }
+        return res;
+    }
+}
+
+
+
+
+
+
+

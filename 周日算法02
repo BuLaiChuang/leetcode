@@ -1,0 +1,270 @@
+遍历变种：自顶向下
+        104.二叉树的最大深度
+        112.路径总和
+        113.路径总和 II
+        437.路径总和 III
+        257.二叉树的所有路径
+        687.最长同值路径
+        129.求根节点到叶节点数字之和
+        988.从叶结点开始的最小字符串
+遍历变种：非自顶向下
+        124.二叉树中的最大路径和
+        543.二叉树的直径
+        652.寻找重复的子树
+        235.二叉搜索树的最近公共祖先
+        236.二叉树的最近公共祖先
+
+
+104
+class Solution {
+    public int maxDepth(TreeNode root) {
+        int countnum = 0;
+        if(root == null) {
+            return countnum;
+        }
+        
+        Queue<TreeNode> queue = new LinkedList<TreeNode>();
+        queue.add(root);
+        while(!queue.isEmpty()) {
+            countnum++;
+            int nodecount = queue.size(); // 第一次把queue.size()直接写在for循环里边了，有一个测试用例错了。想了半天才明白，如果下面if判断里边两个都成立，那么for循环就会比之前增加了一个
+            for(int i=0;i<nodecount;i++) {
+                TreeNode node = queue.poll();
+                if(node.left != null) {
+                    queue.add(node.left);
+                }
+                if(node.right != null) {
+                    queue.add(node.right);
+                }
+            }
+        }
+        return countnum;
+    }
+}
+
+112
+// 看到这个题第一反应就是不会
+// 看了官方题解，就是比之前多加了一个队列，用来存计算结果的队列
+class Solution {
+    public boolean hasPathSum(TreeNode root, int targetSum) {
+        if(root == null) {
+            return false;
+        }
+
+//定义两个队列，上面的用来存储节点，下面的用来存储节点对应的计算的值
+        Queue<TreeNode> queNode = new LinkedList<TreeNode>();
+        Queue<Integer> queVal = new LinkedList<Integer>();
+        queNode.add(root);
+        queVal.add(root.val);
+        while(!queNode.isEmpty()) {
+            TreeNode node = queNode.poll();
+            int tmp = queVal.poll();
+            // 因为题目中要求的是根节点到叶子节点的路径。所以这里需要判断是否是叶子节点
+            if(node.left == null && node.right == null) {
+                // 再判断加起来的结果是否和targetSum相等
+                if(tmp == targetSum) {
+                    return true;
+                }
+                continue;
+            }
+            if(node.left != null) {
+                queNode.add(node.left);
+                queVal.add(tmp+node.left.val);
+            }
+            if(node.right != null) {
+                queNode.add(node.right);
+                queVal.add(tmp+node.right.val);
+            }
+
+        }
+        return false;
+    }
+}
+
+113  
+// 这个比上一个题增加了一些难度，因为需要输出符合目标的路径
+class Solution {
+
+List<List<Integer>> ret = new LinkedList<List<Integer>>();
+Deque<Integer> path = new LinkedList<Integer>();
+    public List<List<Integer>> pathSum(TreeNode root, int targetSum) {
+        
+        if (root == null) {
+            return ret;
+        }
+
+        path.add(root.val);
+        targetSum -= root.val;
+
+        if (root.left == null && root.right == null && targetSum == 0) {
+            // List<Integer> queue = new LinkedList<Integer>(path);
+            // ret.add(queue); // 不懂
+            List<Integer> queue = new LinkedList<Integer>();
+            queue.addAll(path);
+            ret.add(queue);
+        }
+        pathSum(root.left, targetSum);
+        pathSum(root.right, targetSum);
+        path.pollLast();
+        return ret;
+    }
+}
+
+437
+这个有点难度
+
+
+
+257
+//上面那些题都用到了深度优先遍历DFS和广度优先遍历BFS，这里来复习一下
+
+
+现在有个问题就是，这道题是进行字符串的拼接，如果拼接一次，调用了递归，然后又拼接一次，又调用递归，拼接不会中断吗？还是拼接重新开始了
+在哔哩哔哩上找到了递归的讲解，写个公众号
+
+//这个是递归的写法
+class Solution {
+    public List<String> binaryTreePaths(TreeNode root) {
+        List<String> paths = new ArrayList<String>();
+        constructPaths(root, "", paths);
+        return paths;
+    }
+
+    public void constructPaths(TreeNode root, String path, List<String> paths) {
+        if (root != null) {
+            StringBuffer pathSB = new StringBuffer(path);
+            pathSB.append(Integer.toString(root.val));
+            if (root.left == null && root.right == null) {  // 当前节点是叶子节点
+                paths.add(pathSB.toString());  // 把路径加入到答案中
+            }else{
+                pathSB.append("->");
+                constructPaths(root.left,pathSB.toString(),paths);
+                constructPaths(root.right,pathSB.toString(),paths);
+            }
+        }
+    }
+}
+
+
+//不是递归
+class Solution {
+    public List<String> binaryTreePaths(TreeNode root) {
+        List<String> list = new LinkedList<>();
+        if(root == null) {
+            return list;
+        }
+
+        Stack<TreeNode> stack = new Stack<>(); // 这两个数据结构要使用一样的
+        Stack<String> pathQueue = new Stack<String>();
+        stack.push(root);
+        pathQueue.push(Integer.toString(root.val));
+
+        while(!stack.isEmpty()) {
+            TreeNode node = stack.pop();
+            String path = pathQueue.pop();
+
+            if(node.left == null && node.right == null) {
+                list.add(path);
+            }else{
+                
+                if(node.right != null) {
+                    stack.push(node.right);
+                    // StringBuffer str = new StringBuffer();
+                    // str.append(path);
+                    // str.append("->");
+                    // str.append(Integer.toString(node.right.val));
+                    pathQueue.push(new StringBuffer(path).append("->").append(node.right.val).toString());
+                    
+                }
+                if(node.left != null) {
+                    stack.push(node.left);
+                    // StringBuffer str = new StringBuffer();
+                    // str.append(path);
+                    // str.append("->");
+                    // str.append(Integer.toString(node.left.val));
+                    pathQueue.push(new StringBuffer(path).append("->").append(node.left.val).toString());
+                    
+                }
+            }
+        }
+        return list;
+    }
+}
+
+129
+class Solution {
+    public int sumNumbers(TreeNode root) {
+        List<String> list = new LinkedList<>();
+        int sumNode = 0;
+        // 深度优先遍历
+        if(root == null) {
+            return sumNode;
+        }
+
+        // 定义一个栈
+        Stack<TreeNode> node = new Stack<>();
+        // 定义一个存储节点值
+        Stack<String> que = new Stack<String>();
+        node.push(root);
+        que.push(Integer.toString(root.val));
+
+        while(!node.isEmpty()) {
+            TreeNode tmp = node.pop();
+            String tmpque = que.pop();
+            if(tmp.left == null && tmp.right == null) {
+                sumNode += Integer.parseInt(tmpque);
+            }else {
+                if(tmp.left != null) {
+                    node.push(tmp.left);
+                    que.push(new StringBuffer(tmpque).append(tmp.left.val).toString());
+                }
+                if(tmp.right != null) {
+                    node.push(tmp.right);
+                    que.push(new StringBuffer(tmpque).append(tmp.right.val).toString());
+                }
+            }
+            
+        }
+        return sumNode;
+    }
+}
+========
+//刚刚换了存储节点用栈，存储节点的值用队列，有一个测试用例错了
+//然后都换成队列，就成功了
+class Solution {
+    public int sumNumbers(TreeNode root) {
+        List<String> list = new LinkedList<>();
+        int sumNode = 0;
+        // 深度优先遍历
+        if(root == null) {
+            return sumNode;
+        }
+
+        // 定义一个栈
+        Queue<TreeNode> node = new LinkedList<>();
+        // 定义一个存储节点值
+        Queue<String> que = new LinkedList<String>();
+        node.add(root);
+        que.add(Integer.toString(root.val));
+
+        while(!node.isEmpty()) {
+            TreeNode tmp = node.poll();
+            String tmpque = que.poll();
+            if(tmp.left == null && tmp.right == null) {
+                sumNode += Integer.parseInt(tmpque);
+            }else {
+                if(tmp.left != null) {
+                    node.add(tmp.left);
+                    que.add(new StringBuffer(tmpque).append(tmp.left.val).toString());
+                }
+                if(tmp.right != null) {
+                    node.add(tmp.right);
+                    que.add(new StringBuffer(tmpque).append(tmp.right.val).toString());
+                }
+            }
+            
+        }
+        return sumNode;
+    }
+}
+

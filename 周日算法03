@@ -1,0 +1,49 @@
+遍历变种：非自顶向下
+        124.二叉树中的最大路径和
+        543.二叉树的直径
+        652.寻找重复的子树
+        235.二叉搜索树的最近公共祖先
+        236.二叉树的最近公共祖先
+
+543
+//二叉树的直径
+补充：二叉树的高度和二叉树的深度
+深度是从上到下的，高度是从下往上
+二叉树中某节点的深度是指从根节点到该节点的最长简单路径边的条数。高度是指从该节点到叶子节点的最长简单路径边的条数。
+但在一棵二叉树中，同一深度的不同节点，高度不一定相等
+
+
+// 这是刚开始写的递归，错了，原因很简单，问题就是return那里，这里的return是直接返回给这个函数的
+class Solution {
+    public int diameterOfBinaryTree(TreeNode root) {
+        int res = 0;
+        if(root == null) {
+            return res;
+        }
+        int left = diameterOfBinaryTree(root.left);
+        int right = diameterOfBinaryTree(root.right);
+        // 二叉树的直径是左右两边高度之和
+        res = Math.max(res,right+left);
+        // 递归想上一层返回时候，高度需要加1
+        return Math.max(right,left)+1;
+    }
+}
+
+//这是正确答案
+class Solution {
+    int ans;
+    public int diameterOfBinaryTree(TreeNode root) {
+        ans = 1;
+        depth(root);
+        return ans - 1;
+    }
+    public int depth(TreeNode node) {
+        if (node == null) {
+            return 0; // 访问到空节点了，返回0
+        }
+        int L = depth(node.left); // 左儿子为根的子树的深度
+        int R = depth(node.right); // 右儿子为根的子树的深度
+        ans = Math.max(ans, L+R+1); // 计算d_node即L+R+1 并更新ans
+        return Math.max(L, R) + 1; // 返回该节点为根的子树的深度
+    }
+}
